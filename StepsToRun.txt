@@ -1,0 +1,4 @@
+To run on colab
+1. Install tokenizers and transformer 
+2. Upload the files from hindi_data folder
+3. Run the cells
