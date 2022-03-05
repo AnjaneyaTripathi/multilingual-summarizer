@@ -1,16 +1,20 @@
 import re
 import nltk
 import math
+import pickle as pkl
 from nltk.tokenize import word_tokenize, sent_tokenize
 from nltk.tag import tnt
 from nltk.corpus import indian
 
 # Get sentences from the file
-def clean_text(file_name):
+def clean_text(file_name, language):
     with open(file_name, 'r', encoding="UTF-8") as file:
         text = file.read()
         text = removeBrackets(text)
-    article = text.split('।')
+    if language=='hindi':    
+        article = text.split('।')
+    else:
+        article = text.split('.')
     sentences = []
     for sentence in article:
         sentences.append(sentence)
@@ -72,7 +76,6 @@ def cnt_quotes(sent):
     res = re.findall(regex, sent)
     cnt = 0
     for quote in res:
-        print(quote[0])
         cnt = cnt + cnt_words(quote[0])
     return cnt
 
@@ -86,11 +89,30 @@ def cnt_title_words(sent, title):
           cnt = cnt + 1
     return cnt
 
-def pos_tagging(sentence):
+def pos_tagging_marathi(sentence):
+  wordsList = nltk.word_tokenize(sentence)
+  tagged_words = marathi_pos.tag(wordsList)
+  print(tagged_words)
+  count=0
+  for word in tagged_words:
+    if 'NN' in word[1]:
+      count+=1
+  return count
+
+def pos_tagging_hindi(sentence):
   train_data = indian.tagged_sents('hindi.pos')
   tnt_pos_tagger = tnt.TnT()
   tnt_pos_tagger.train(train_data)
   tagged_words = (tnt_pos_tagger.tag(nltk.word_tokenize(sentence)))
+  count=0
+  for word in tagged_words:
+    if 'NN' in word[1]:
+      count+=1
+  return count
+
+def pos_tagging_english(sentence):
+  wordsList = nltk.word_tokenize(sentence)
+  tagged_words = nltk.pos_tag(wordsList)
   count=0
   for word in tagged_words:
     if 'NN' in word[1]:
@@ -177,59 +199,68 @@ def sent_scores(tfidf_scores, sentences, text_data):
         sent_data.append(temp)
     return sent_data
 
-sentences = clean_text('text.txt')
-print(sentences)
-length = len(sentences)
-txt_data, maxi = cnt_in_sent(sentences)
-for sentence in txt_data:
-    sentence['num_words'] = sentence['word_cnt']/maxi
-for i in range(length):
-    sentence = sentences[i]
-    url_email = cnt_url_email(sentence)
-    txt_data[i]['url_email'] = url_email/txt_data[i]['word_cnt']
-    special_chars = cnt_special_chars(sentence)
-    txt_data[i]['special_chars'] = special_chars/txt_data[i]['word_cnt']
-    numbers = cnt_numbers(sentence)
-    txt_data[i]['numbers'] = numbers/txt_data[i]['word_cnt']
-    quote_chars = cnt_quotes(sentence)
-    txt_data[i]['quote_chars'] = quote_chars/txt_data[i]['word_cnt']
-    title_words = cnt_title_words(sentence, "भारत और साउथ अफ्रीका की टेस्ट")
-    txt_data[i]['title_words'] = title_words/txt_data[i]['word_cnt']
-    nouns = pos_tagging(sentence)
-    txt_data[i]['nouns'] = nouns/txt_data[i]['word_cnt']
-    txt_data[i]['position'] = sentence_position(i, len(sentences))
-freq_list = freq_dict(sentences)
-text_data, num = cnt_in_sent(sentences)
+def get_summary(filename, title, language):
+    sentences = clean_text(filename, language)
+    length = len(sentences)
+    txt_data, maxi = cnt_in_sent(sentences)
+    for sentence in txt_data:
+        sentence['num_words'] = sentence['word_cnt']/maxi
+    for i in range(length):
+        sentence = sentences[i]
+        url_email = cnt_url_email(sentence)
+        txt_data[i]['url_email'] = url_email/txt_data[i]['word_cnt']
+        special_chars = cnt_special_chars(sentence)
+        txt_data[i]['special_chars'] = special_chars/txt_data[i]['word_cnt']
+        numbers = cnt_numbers(sentence)
+        txt_data[i]['numbers'] = numbers/txt_data[i]['word_cnt']
+        quote_chars = cnt_quotes(sentence)
+        txt_data[i]['quote_chars'] = quote_chars/txt_data[i]['word_cnt']
+        title_words = cnt_title_words(sentence, title)
+        txt_data[i]['title_words'] = title_words/txt_data[i]['word_cnt']
+        if language=='hindi':
+            nouns = pos_tagging_hindi(sentence)
+        else:
+            nouns = pos_tagging_english(sentence)
+        txt_data[i]['nouns'] = nouns/txt_data[i]['word_cnt']
+        txt_data[i]['position'] = sentence_position(i, len(sentences))
+    freq_list = freq_dict(sentences)
+    text_data, num = cnt_in_sent(sentences)
+    
+    tf_scores = calc_TF(text_data, freq_list)
+    idf_scores = calc_IDF(text_data, freq_list)
+    
+    tfidf_scores = calc_TFIDF(tf_scores, idf_scores)
+    
+    sent_data = sent_scores(tfidf_scores, sentences, text_data)
+    num = 0
+    for sent in sent_data:
+      txt_data[num]['tf-idf'] = sent['score']
+      num+=1
+    
+    # Generate final sentence score
+    final_scores = []
+    all_scores = 0
+    for i in range(length):
+      d = {}
+      d['sentence'] = sentences[i]
+      score = txt_data[i]['num_words'] + txt_data[i]['url_email'] + txt_data[i]['special_chars'] + txt_data[i]['numbers'] + txt_data[i]['quote_chars'] + txt_data[i]['title_words'] + txt_data[i]['nouns'] + txt_data[i]['position'] + txt_data[i]['tf-idf']
+      d['score'] = score
+      all_scores+=score
+      final_scores.append(d)
+      
+    cut_off = all_scores/length    
+    
+    # Generate summary
+    summary = ''
+    for sent in final_scores:
+      if sent['score']>cut_off:
+        summary = summary + sent['sentence'] + '. '
+    
+    return summary
 
-tf_scores = calc_TF(text_data, freq_list)
-idf_scores = calc_IDF(text_data, freq_list)
-
-tfidf_scores = calc_TFIDF(tf_scores, idf_scores)
-
-sent_data = sent_scores(tfidf_scores, sentences, text_data)
-num = 0
-for sent in sent_data:
-  txt_data[num]['tf-idf'] = sent['score']
-  num+=1
-
-# Generate final sentence score
-final_scores = []
-all_scores = []
-for i in range(length):
-  d = {}
-  d['sentence'] = sentences[i]
-  score = txt_data[i]['num_words'] + txt_data[i]['url_email'] + txt_data[i]['special_chars'] + txt_data[i]['numbers'] + txt_data[i]['quote_chars'] + txt_data[i]['title_words'] + txt_data[i]['nouns'] + txt_data[i]['position'] + txt_data[i]['tf-idf']
-  d['score'] = score
-  all_scores.append(score)
-  final_scores.append(d)
-
-all_scores.sort()
-cut_off = all_scores[int(0.75*length)]
-
-# Generate summary
-summary = ''
-for sent in final_scores:
-  if sent['score']>cut_off:
-    summary = summary + '\n' + sent['sentence']
-
-print(summary)
+filenm = 'marathi_pos.pickle'
+marathi_pos = pkl.load(open(filenm, 'rb'))
+    
+# print(get_summary('cricket_hindi.txt', "भारत और साउथ अफ्रीका की टेस्ट",  'hindi'))
+# print(get_summary('blockchain_english.txt', 'Blockchain', 'english'))
+# print(get_summary('mansi_marathi.txt', 'मानसी शिरीष कणेकर', 'marathi'))
