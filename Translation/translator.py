@@ -9,22 +9,5 @@ def translate(text, language):
     result = translator.translate(text, src='mr', dest='en')
   return result
 
-# import nltk
-# nltk.download('punkt')
-
-# from transformers import pipeline
-# from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
-# from nltk.tokenize import sent_tokenize
-
-# tokenizer = AutoTokenizer.from_pretrained("Helsinki-NLP/opus-mt-en-hi")
-# model = AutoModelForSeq2SeqLM.from_pretrained("Helsinki-NLP/opus-mt-en-hi")
-# translation = pipeline('translation', model=model, tokenizer=tokenizer)
-
-# def translate(text):
-#     result = []
-#     lines = sent_tokenize(text)
-#     n = len(lines)
-#     for i  in range(n):
-#       translated_text = translation(lines, max_length=400)[i]['translation_text']
-#       result.append(translated_text)
-#     return result
+text = 'भारत और साउथ अफ्रीका के बीच जोहान्सबर्ग में आज दूसरे टेस्ट के तीसरे दिन का खेल शुरू हो गया है.  दूसरी पारी में भारत ने 2 विकेट खोकर 101 रन बनाए हैं.  चेतेश्वर पुजारा और अजिंक्य रहाणे रन पर नाबाद हैं.  यह पारी इन दोनों बल्लेबाजों के लिए अग्नि परीक्षा के समान है.  टीम इंडिया की लीड 68 रनों की हो गई है.  मैच का लाइव स्कोर देखने के लिए यहां क्लिक करें भारतीय टीम ने तीसरे दिन की शुरुआत में पिच पर हैवी रोलर लेने का फैसला किया है.  इससे शुरुआती 30 से 45 मिनट तक पिच के क्रैक दब सकते हैं और बल्लेबाजों को असमान उछाल से कम परेशानी हो सकती है.  दिग्गज कमेंटेटर सुशील दोषी से सुनिए इस टेस्ट मैच का एनालिसिस दूसरे दिन के आखिरी सेशन में पुजारा-रहाणे ने संभाला मोर्चा दोनों सलामी बल्लेबाज के आउट होने के बाद आउट ऑफ फॉर्म चल रहे पुजारा और रहाणे ने मोर्चा संभाला.  साउथ अफ्रीका के खिलाफ जोहान्सबर्ग टेस्ट मैच की पहली पारी में पुजारा पुजारा 3 रन बनाकर और रहाणे बिना खाता खोले पवेलियन लौट गए थे.  वहीं, साउथ अफ्रीका को अपने तेज गेंदबाजों से उम्मीद होगी कि वो जल्द से जल्द भारतीय बल्लेबाजों को आउट करें. '
+translate(text, 'hindi')

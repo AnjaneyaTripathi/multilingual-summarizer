@@ -12,14 +12,14 @@ def clean_text(file_name, language):
         text = file.read()
         text = removeBrackets(text)
     if language=='hindi':    
-        article = text.split('।')
+        article = text.split('|')
     else:
         article = text.split('.')
     sentences = []
     for sentence in article:
         sentences.append(sentence)
     sentences.pop() 
-    display = "".join(sentences)
+    
     return sentences
 
 # counting the number of words in the document (sentence)
@@ -202,6 +202,7 @@ def sent_scores(tfidf_scores, sentences, text_data):
 def get_summary(filename, title, language):
     sentences = clean_text(filename, language)
     length = len(sentences)
+    print(length)
     txt_data, maxi = cnt_in_sent(sentences)
     for sentence in txt_data:
         sentence['num_words'] = sentence['word_cnt']/maxi
