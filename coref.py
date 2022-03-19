@@ -1,4 +1,5 @@
 import os
+from extractor import *
 
 def get_resolved_entities(input_file, output_file):
 
@@ -24,3 +25,5 @@ text, tokens_list = get_resolved_entities('news', 'news_output')
 
 for t in tokens_list:
     print(t)
+
+print(text)
