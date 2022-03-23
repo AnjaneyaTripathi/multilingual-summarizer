@@ -41,7 +41,7 @@ def create_graph(final_nodes):
         nx.draw_networkx_edge_labels(G, pos, edge_labels = edge_labels, font_size = 15)
         return G, edge_labels
 
-with open('./blockchain.txt', 'r') as file:
+with open('./summary.txt', 'r') as file:
     text = file.read()
 
 f = sent_tokenize(text)
@@ -62,4 +62,4 @@ for node in nodes:
 print(final_nodes)
 
 create_graph(final_nodes)
-plt.savefig('./images/kg_1.png')
+plt.savefig('./images/kg_1.1.png')
