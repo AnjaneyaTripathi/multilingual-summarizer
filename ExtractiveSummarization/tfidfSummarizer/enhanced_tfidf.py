@@ -202,22 +202,28 @@ def sent_scores(tfidf_scores, sentences, text_data):
 def get_summary(filename, title, language):
     sentences = clean_text(filename, language)
     length = len(sentences)
-    print(length)
+    # Higher preference to longer sentences
     txt_data, maxi = cnt_in_sent(sentences)
     for sentence in txt_data:
         sentence['num_words'] = sentence['word_cnt']/maxi
     for i in range(length):
         sentence = sentences[i]
+        # Lower preference to sentences with urls and emails
         url_email = cnt_url_email(sentence)
         txt_data[i]['url_email'] = url_email/txt_data[i]['word_cnt']
+        # Higher preference to sentences with special characters
         special_chars = cnt_special_chars(sentence)
         txt_data[i]['special_chars'] = special_chars/txt_data[i]['word_cnt']
+        # Higher preference to sentences with numbers
         numbers = cnt_numbers(sentence)
         txt_data[i]['numbers'] = numbers/txt_data[i]['word_cnt']
+        # Higher preference to sentences with quotes
         quote_chars = cnt_quotes(sentence)
         txt_data[i]['quote_chars'] = quote_chars/txt_data[i]['word_cnt']
+        # Higher preference to sentences that contain title words
         title_words = cnt_title_words(sentence, title)
         txt_data[i]['title_words'] = title_words/txt_data[i]['word_cnt']
+        # Higher preference to sentences with more nouns
         if language=='hindi':
             nouns = pos_tagging_hindi(sentence)
         else:
@@ -226,7 +232,7 @@ def get_summary(filename, title, language):
         txt_data[i]['position'] = sentence_position(i, len(sentences))
     freq_list = freq_dict(sentences)
     text_data, num = cnt_in_sent(sentences)
-    
+    # TF-IDF Scores
     tf_scores = calc_TF(text_data, freq_list)
     idf_scores = calc_IDF(text_data, freq_list)
     
@@ -244,7 +250,7 @@ def get_summary(filename, title, language):
     for i in range(length):
       d = {}
       d['sentence'] = sentences[i]
-      score = txt_data[i]['num_words'] + txt_data[i]['url_email'] + txt_data[i]['special_chars'] + txt_data[i]['numbers'] + txt_data[i]['quote_chars'] + txt_data[i]['title_words'] + txt_data[i]['nouns'] + txt_data[i]['position'] + txt_data[i]['tf-idf']
+      score = txt_data[i]['num_words'] - txt_data[i]['url_email'] + txt_data[i]['special_chars'] + txt_data[i]['numbers'] + txt_data[i]['quote_chars'] + txt_data[i]['title_words'] + txt_data[i]['nouns'] + txt_data[i]['position'] + txt_data[i]['tf-idf']
       d['score'] = score
       all_scores+=score
       final_scores.append(d)
@@ -259,7 +265,7 @@ def get_summary(filename, title, language):
     
     return summary
 
-filenm = 'marathi_pos.pickle'
+filenm = 'extractiveSummarization/tfidfSummarizer/marathi_pos.pickle'
 marathi_pos = pkl.load(open(filenm, 'rb'))
     
 # print(get_summary('cricket_hindi.txt', "भारत और साउथ अफ्रीका की टेस्ट",  'hindi'))

@@ -4,36 +4,34 @@ Created on Fri Feb 25 16:35:45 2022
 
 @author: Isha
 """
-
-import sys
-sys.path.insert(0, 'ExtractiveSummarization/tfidf-summarizer')
-
-import enhanced_tfidf as summarizer
+import glob
+import os
+from translation.translation import translate
+from extractiveSummarization.tfidfSummarizer.enhanced_tfidf import get_summary
 
 def summarize_translate(filename, title, language):
     with open(filename, 'r', encoding="UTF-8") as file:
             text = file.read()
-            print(len(text))
             if(len(text)>1000):
-                text = summarizer.get_summary(filename, title, language)
+                text = get_summary(filename, title, language)
+            if(language != 'english'):
+                text = translate(text, language)
+                text = text.text
+    return text
 
-    sys.path.insert(0, 'Translation')
+folder = 'war'
+titles = ['Russia Ukraine war', 'रूस यूक्रेन युद्ध', 'रशिया युक्रेन युद्ध']
+languages = ['english', 'hindi', 'marathi']
 
-    import translator
-
-    if(language != 'english'):
-        text = translator.translate(text, language)
-
-    return text.text
-
-filenames = ['war_hindi.txt', 'war_marathi.txt']
-titles = ['रूस यूक्रेन युद्ध', 'रशिया युक्रेन युद्ध']
-languages = ['hindi', 'marathi']
-
-for i in range(len(filenames)):
-    doc = ''
-    text = summarize_translate(filenames[i], titles[i], languages[i])
+path = 'samples/inputs/' + folder
+i=0
+doc=''
+for filename in glob.glob(os.path.join(path, '*.txt')):
+    text = summarize_translate(filename, titles[i], languages[i])
+    i=i+1
     doc += text + '\n'
 
-print(doc)
+filename = 'samples/outputs/summary' + folder + '.txt'
 
+with open(filename, 'w') as file:
+    file.write(doc)
