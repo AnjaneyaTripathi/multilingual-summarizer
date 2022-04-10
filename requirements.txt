@@ -1,0 +1,17 @@
+apex==0.9.10dev
+en_core_web_lg==3.2.0
+googletrans==3.0.0
+keybert==0.5.0
+matplotlib==3.2.2
+networkx==2.5
+nltk==3.6.1
+numpy==1.19.5
+pandas==1.2.4
+ptvsd==4.3.2
+scipy==1.6.2
+sentence_transformers==2.2.0
+spacy==3.2.1
+tensorboardX==2.5
+torch==1.10.1
+tqdm==4.40.1
+transformers==4.16.2

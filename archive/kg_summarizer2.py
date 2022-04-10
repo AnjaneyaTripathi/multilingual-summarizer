@@ -8,11 +8,12 @@ import matplotlib.pyplot as plt
 from operator import add
 from extractor.extractor import findSVOs
 from transformers import pipeline
+from keytotext import pipeline
 
 import en_core_web_lg
 nlp = en_core_web_lg.load()
 
-filename = 'summaryimrankhan'
+filename = 'summary'
 
 with open('./data/' + filename + '.txt', 'r') as file:
     text = file.read()
@@ -32,13 +33,18 @@ for node in nodes:
         if(len(j) == 3):
             final_nodes.append(j)
 
-print(final_nodes)
+nlp = pipeline("k2t-base")  #loading the pre-trained model
+params = {"do_sample":True, "num_beams":10, "no_repeat_ngram_size":3, "early_stopping":True}    #decoding params
 
-def join_tuple_string(strings_tuple) -> str:
-   return ' '.join(strings_tuple)
+res = ""
 
-result = map(join_tuple_string, final_nodes)
-result = ". ".join(result)
+for node in final_nodes:
+    temp = nlp(node, **params)
+    res = res + temp
+    print(node)
+    print(temp)
+    print("\n\n")
+
 
 def bart_large_cnn(text):
     print("Original Text:\n", text)
@@ -47,8 +53,5 @@ def bart_large_cnn(text):
     print("Summary:\n", summary)
     return summary
 
-result1 = text + result
-result2 = result + text
-
-bart_large_cnn(result1)
-bart_large_cnn(result2)
+bart_large_cnn(res)
+# bart_large_cnn(result2)

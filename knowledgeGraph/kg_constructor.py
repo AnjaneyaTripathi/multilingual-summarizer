@@ -61,6 +61,8 @@ for node in nodes:
         if(len(j) == 3):
             final_nodes.append(j)
 
+print(final_nodes)
+
 def join_tuple_string(strings_tuple) -> str:
    return ' '.join(strings_tuple)
 
