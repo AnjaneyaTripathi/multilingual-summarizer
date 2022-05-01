@@ -7,7 +7,7 @@ Created on Fri Feb 25 16:35:45 2022
 import glob
 import os
 from translation.translation import translate
-from extractiveSummarization.tfidfSummarizer.enhanced_tfidf import get_summary
+from ExtractiveSummarization.tfidfSummarizer.enhanced_tfidf import get_summary
 
 def summarize_translate(filename, title, language):
     with open(filename, 'r', encoding="UTF-8") as file:

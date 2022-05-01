@@ -6,13 +6,17 @@ from nltk.tokenize import word_tokenize, sent_tokenize
 from nltk.tag import tnt
 from nltk.corpus import indian
 
+import nltk
+nltk.download('averaged_perceptron_tagger')
+nltk.download('indian')
+
 # Get sentences from the file
 def clean_text(file_name, language):
-    with open(file_name, 'r', encoding="UTF-8") as file:
+    with open('./data/original_docs/english/' + file_name + '.txt', 'r', encoding="UTF-8") as file:
         text = file.read()
         text = removeBrackets(text)
     if language=='hindi':    
-        article = text.split('|')
+        article = text.split('.')
     else:
         article = text.split('.')
     sentences = []

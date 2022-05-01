@@ -40,7 +40,30 @@ def getBLEUScore(candidate, reference):
     return result
 
 def getBERTScore(candidate, reference):
-    P, R, F1 = score(candidate, reference, lang="en", verbose=True)
+    candidate_sentences = sent_tokenize(candidate)
+    reference_sentences = sent_tokenize(reference)
+
+    for sent1 in candidate_sentences: 
+        temp_p, temp_r, temp_f1 = 0, 0, 0
+        for sent2 in reference_sentences:
+            P, R, F1 = score(sent1, sent2, lang="en", verbose=True)
+
+            temp_p += P
+            temp_r += R
+            temp_f1 += F1
+        
+        temp_p /= len(reference_sentences)
+        temp_r /= len(reference_sentences)
+        temp_f1 /= len(reference_sentences)
+
+        result_p += temp_p
+        result_r += temp_r
+        result_f1 += temp_f1
+
+    result_p /= len(candidate_sentences)
+    result_r /= len(candidate_sentences)
+    result_f1 /= len(candidate_sentences)
+
     result = [P.mean(), R.mean(), F1.mean()]
 
     return result
@@ -112,35 +135,43 @@ def getKeyBERTScore(candidate, reference):
     return result
 
 def evaluate(candidate, reference):
-    bleu_score = getBLEUScore(candidate, reference)
-    print('evaluated bleu score...', bleu_score)
-
-    bert_score = getBERTScore(candidate, reference)
-    print('evaluated bert score...', bert_score)
-
+    # bleu_score = getBLEUScore(candidate, reference)
+    bleu_score = 0
+    # bert_score = getBERTScore(candidate, reference)
+    bert_score = 0
     rouge_score = getROUGEScore(candidate, reference)
-    print('evaluated rouge score...', rouge_score)
-
-    # fix a bug in this - getting [], not a vector
     embeddedCosineScore = getEmbeddedCosineScore(candidate, reference)
-    print('evaluated embedded cosine score...', embeddedCosineScore)
-
     frequencyCosineScore = getFrequencyCosineScore(candidate, reference)
-    print('evaluated frequency cosine score...', frequencyCosineScore)
-
     keybert_score = getKeyBERTScore(candidate, reference)
-    print('evaluated keybert score...', keybert_score)
 
     return bleu_score, bert_score, rouge_score, embeddedCosineScore, frequencyCosineScore, keybert_score
 
-filename = 'bc'
+def main():
+    cand_path = './data/generated_summaries/extractive/'
+    ref_path = './data/gold_standards/extractive/'
 
-with open('./data/kg_input/' + filename + '.txt', 'r') as file:
-    reference = file.read()
+    docs = ['bharatpe', 'imrankhan', 'srilanka', 'war', 'willsmith']
 
-with open('./data/kg_input/' + filename + '.txt', 'r') as file:
-    candidate = file.read()
+    for doc in docs:
+        with open(ref_path + doc + '.txt', 'r') as file:
+            reference = file.read()
 
-# evaluate(candidate, reference)
+        with open(cand_path + doc + '.txt', 'r') as file:
+            candidate = file.read()
 
-print(getEmbeddedCosineScore(candidate, reference))
+        print('---file name: ', doc)
+
+        bleu_score, bert_score, rouge_score, embeddedCosineScore, frequencyCosineScore, keybert_score = evaluate(candidate, reference)
+
+        print('---bleu score: ', bleu_score)
+        print('---bert score: ', bert_score)
+        print('---rouge score: ', rouge_score)
+        print('---embedded cosine score: ', embeddedCosineScore)
+        print('---frequency cosine score: ', frequencyCosineScore)
+        print('---keybert score: ', keybert_score)
+
+        print('\n\n')
+
+
+if __name__ == "__main__":
+    main()
