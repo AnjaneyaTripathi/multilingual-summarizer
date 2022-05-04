@@ -3,6 +3,7 @@ import nltk
 import math
 from nltk.tokenize import word_tokenize, sent_tokenize
 
+
 def clean_text(file_name):
     with open(file_name, 'r') as file:
         text = file.read()
@@ -12,7 +13,7 @@ def clean_text(file_name):
     # removing special characters and extra whitespaces
     for sentence in article:
         sentences.append(sentence)
-    sentences.pop() 
+    sentences.pop()
     display = "".join(sentences)
     print('Initial Text: ')
     print(display)
@@ -20,25 +21,31 @@ def clean_text(file_name):
     return sentences
 
 # counting the number of words in the document (sentence)
+
+
 def cnt_words(sent):
     cnt = 0
     words = word_tokenize(sent)
     for word in words:
         cnt = cnt + 1
     return cnt
-   
-# getting data about each sentence (frequency of words) 
+
+# getting data about each sentence (frequency of words)
+
+
 def cnt_in_sent(sentences):
     txt_data = []
     i = 0
     for sent in sentences:
         i = i + 1
         cnt = cnt_words(sent)
-        temp = {'id' : i, 'word_cnt' : cnt}
+        temp = {'id': i, 'word_cnt': cnt}
         txt_data.append(temp)
     return txt_data
 
 # creating a dictionary of words for each document (sentence)
+
+
 def freq_dict(sentences):
     i = 0
     freq_list = []
@@ -52,11 +59,13 @@ def freq_dict(sentences):
                 freq_dict[word] = freq_dict[word] + 1
             else:
                 freq_dict[word] = 1
-            temp = {'id' : i, 'freq_dict' : freq_dict}
+            temp = {'id': i, 'freq_dict': freq_dict}
         freq_list.append(temp)
     return freq_list
-   
-# calculating the term frequency 
+
+# calculating the term frequency
+
+
 def calc_TF(text_data, freq_list):
     tf_scores = []
     for item in freq_list:
@@ -66,26 +75,30 @@ def calc_TF(text_data, freq_list):
                 'id': item['id'],
                 'tf_score': item['freq_dict'][k]/text_data[ID-1]['word_cnt'],
                 'key': k
-                }
+            }
             tf_scores.append(temp)
     return tf_scores
-    
-#calculating the inverse document frequency
+
+# calculating the inverse document frequency
+
+
 def calc_IDF(text_data, freq_list):
-    idf_scores =[]
+    idf_scores = []
     cnt = 0
     for item in freq_list:
         cnt = cnt + 1
         for k in item['freq_dict']:
             val = sum([k in it['freq_dict'] for it in freq_list])
             temp = {
-                'id': cnt, 
-                'idf_score': math.log(len(text_data)/(val+1)), 
+                'id': cnt,
+                'idf_score': math.log(len(text_data)/(val+1)),
                 'key': k}
             idf_scores.append(temp)
     return idf_scores
 
 # calculating TFIDF value
+
+
 def calc_TFIDF(tf_scores, idf_scores):
     tfidf_scores = []
     for j in idf_scores:
@@ -95,11 +108,13 @@ def calc_TFIDF(tf_scores, idf_scores):
                     'id': j['id'],
                     'tfidf_score': j['idf_score'] * i['tf_score'],
                     'key': j['key']
-                    }
+                }
                 tfidf_scores.append(temp)
     return tfidf_scores
 
 # giving each sentence a score
+
+
 def sent_scores(tfidf_scores, sentences, text_data):
     sent_data = []
     for txt in text_data:
@@ -116,11 +131,13 @@ def sent_scores(tfidf_scores, sentences, text_data):
     return sent_data
 
 # creating the summary
+
+
 def summary(sent_data):
     cnt = 0
     summary = []
     for t_dict in sent_data:
-        cnt  = cnt + t_dict['score']
+        cnt = cnt + t_dict['score']
     avg = cnt / len(sent_data)
     for sent in sent_data:
         if sent['score'] >= (avg):
@@ -129,7 +146,7 @@ def summary(sent_data):
     return summary
 
 
-sentences =  clean_text('text.txt')
+sentences = clean_text('text.txt')
 text_data = cnt_in_sent(sentences)
 
 freq_list = freq_dict(sentences)
@@ -143,9 +160,3 @@ result = summary(sent_data)
 
 print('Final Summary: ')
 print(result)
-
-
-
-        
-            
-    
